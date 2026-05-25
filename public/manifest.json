@@ -1,0 +1,18 @@
+{
+  "name": "مدير المهام الذكي — TaskAI",
+  "short_name": "TaskAI",
+  "description": "تطبيق إدارة مهام ذكي مدعوم بالذكاء الاصطناعي لتنظيم جدول أعمالك اليومي",
+  "start_url": "/tasks",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

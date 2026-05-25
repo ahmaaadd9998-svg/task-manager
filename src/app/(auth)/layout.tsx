@@ -1,0 +1,20 @@
+import React from 'react'
+
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-slate-100 via-slate-50 to-blue-50/30 p-6">
+      <div className="w-full max-w-md">
+        <div className="flex flex-col items-center mb-8">
+          <img src="/app-icon.jpg" alt="TaskAI Logo" className="w-24 h-auto object-contain rounded-2xl shadow-lg shadow-black/5 mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900">TaskAI</h2>
+          <p className="text-sm text-gray-500 mt-1">نظام إدارة المهام الذكي المدعوم بالذكاء الاصطناعي</p>
+        </div>
+        {children}
+        <div className="flex items-center justify-center gap-2 mt-8 text-xs text-gray-400 select-none">
+          <img src="/logo.png" alt="Ahmed Kabsh Logo" className="h-5 w-auto object-contain bg-black rounded p-0.5" />
+          <span>Copyright © 2026 Ahmed Kabsh. All rights reserved.</span>
+        </div>
+      </div>
+    </div>
+  )
+}

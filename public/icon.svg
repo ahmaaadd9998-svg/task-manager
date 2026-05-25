@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#8B5CF6" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#8B5CF6" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  <!-- Background Circle with Gradient and Shadow -->
+  <circle cx="256" cy="256" r="220" fill="url(#gradient)" filter="url(#shadow)" />
+  <!-- White Checkmark with Rounded Ends -->
+  <path d="M170 256 l60 60 l120 -120" stroke="white" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  <!-- Small AI Sparkles (little stars/dots) -->
+  <circle cx="380" cy="150" r="16" fill="#FDE047" />
+  <circle cx="120" cy="360" r="12" fill="#FDE047" />
+  <path d="M350 330 l8 -8 l8 8 l-8 8 z" fill="#FDE047" />
+</svg>
