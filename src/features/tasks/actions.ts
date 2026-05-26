@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { auth } from '@/features/auth/auth.config'
 import { createTaskSchema, updateTaskSchema } from './validations'
 import * as taskService from './service'
+import type { TaskStatus, TaskPriority } from '@/core/types'
 
 type ActionResult = { error?: string } | undefined
 
@@ -31,9 +32,12 @@ export async function createTaskAction(_prev: ActionResult, formData: FormData):
 
 export async function quickCreateTaskAction(formData: FormData) {
   const userId = await getUserId()
-  const title = formData.get('title') as string
-  const description = formData.get('description') as string
-  await taskService.createTask(userId, { title, description, priority: 'medium', projectId: undefined })
+  const parsed = createTaskSchema.safeParse({
+    title: formData.get('title'),
+    description: formData.get('description'),
+  })
+  if (!parsed.success) return
+  await taskService.createTask(userId, { ...parsed.data, priority: 'medium', projectId: undefined })
   revalidatePath('/tasks')
   revalidatePath('/')
 }
@@ -69,23 +73,22 @@ export async function deleteTaskAction(formData: FormData) {
 export async function quickDeleteTaskAction(formData: FormData) {
   const userId = await getUserId()
   const id = formData.get('id') as string
-  if (id) {
-    await taskService.deleteTask(id, userId)
-    revalidatePath('/tasks')
-    revalidatePath('/')
-  }
+  if (!id) return
+  await taskService.deleteTask(id, userId)
+  revalidatePath('/tasks')
+  revalidatePath('/')
 }
 
 export async function updateTaskStatusAction(taskId: string, status: string) {
   const userId = await getUserId()
-  await taskService.updateTask(userId, { id: taskId, status: status as 'todo' | 'in_progress' | 'done' })
+  await taskService.updateTask(userId, { id: taskId, status: status as TaskStatus })
   revalidatePath('/tasks')
   revalidatePath('/')
 }
 
 export async function updateTaskPositionAction(taskId: string, status: string, position: number) {
   const userId = await getUserId()
-  await taskService.updateTask(userId, { id: taskId, status: status as 'todo' | 'in_progress' | 'done', position })
+  await taskService.updateTask(userId, { id: taskId, status: status as TaskStatus, position })
   revalidatePath('/tasks')
   revalidatePath('/')
 }

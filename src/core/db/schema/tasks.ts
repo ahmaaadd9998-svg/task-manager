@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core'
 import { users } from './users'
 import { projects } from './projects'
 
@@ -15,7 +15,11 @@ export const tasks = sqliteTable('tasks', {
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-})
+}, (table) => ({
+  projectIdIdx: index('tasks_project_id_idx').on(table.projectId),
+  assigneeIdIdx: index('tasks_assignee_id_idx').on(table.assigneeId),
+  userIdIdx: index('tasks_user_id_idx').on(table.userId),
+}))
 
 export const taskComments = sqliteTable('task_comments', {
   id: text('id').primaryKey(),
@@ -23,7 +27,10 @@ export const taskComments = sqliteTable('task_comments', {
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   content: text('content').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-})
+}, (table) => ({
+  taskIdIdx: index('task_comments_task_id_idx').on(table.taskId),
+  userIdIdx: index('task_comments_user_id_idx').on(table.userId),
+}))
 
 export const subtasks = sqliteTable('subtasks', {
   id: text('id').primaryKey(),

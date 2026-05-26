@@ -1,5 +1,5 @@
 export { users, accounts, sessions, verificationTokens } from './users'
 export { projects, projectMembers } from './projects'
-export { tasks, taskComments } from './tasks'
+export { tasks, taskComments, subtasks } from './tasks'
 export { subscriptions } from './subscriptions'
 export { aiLogs } from './ai-logs'

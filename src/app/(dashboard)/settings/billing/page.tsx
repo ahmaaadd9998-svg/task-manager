@@ -13,8 +13,8 @@ export default async function BillingPage() {
 
 
   return (
-    <div className="space-y-6 max-w-lg">
-      <h1 className="text-2xl font-bold">الفواتير</h1>
+    <div className="space-y-6 w-full max-w-lg mx-auto">
+      <h1 className="text-xl sm:text-2xl font-bold">الفواتير</h1>
       <Card>
         <CardHeader><CardTitle>الباقة</CardTitle></CardHeader>
         <CardContent className="space-y-4">

@@ -1,6 +1,6 @@
 import { eq, and, inArray } from 'drizzle-orm'
 import { db } from '@/core/db'
-import { tasks, subtasks } from '@/core/db/schema/tasks'
+import { tasks, subtasks } from '@/core/db/schema'
 import type { CreateTaskInput, UpdateTaskInput } from './validations'
 import { logger } from '@/core/lib/logger'
 
@@ -14,15 +14,15 @@ export async function getTasks(userId: string, projectId?: string) {
     .orderBy(tasks.position)
     .all()
 
-  const taskIds = userTasks.map((t: any) => t.id)
+  const taskIds = userTasks.map((t) => t.id)
   let allSubtasks: (typeof subtasks.$inferSelect)[] = []
   if (taskIds.length > 0) {
     allSubtasks = await db.select().from(subtasks).where(inArray(subtasks.taskId, taskIds)).all()
   }
 
-  return userTasks.map((t: any) => ({
+  return userTasks.map((t) => ({
     ...t,
-    subtasks: allSubtasks.filter((st: any) => st.taskId === t.id)
+    subtasks: allSubtasks.filter((st) => st.taskId === t.id)
   }))
 }
 
@@ -93,11 +93,25 @@ export async function createSubtask(taskId: string, title: string, userId: strin
 }
 
 export async function toggleSubtask(id: string, isCompleted: boolean, userId: string) {
-  // ensure user owns task by joining or subquery, but for simplicity let's just do an update
-  // if we want to be strict, we check the task owner first.
+  const subtask = await db.select({
+    id: subtasks.id,
+    taskId: subtasks.taskId,
+  }).from(subtasks)
+    .innerJoin(tasks, eq(subtasks.taskId, tasks.id))
+    .where(and(eq(subtasks.id, id), eq(tasks.userId, userId)))
+    .get()
+  if (!subtask) throw new Error('Subtask not found')
   await db.update(subtasks).set({ isCompleted }).where(eq(subtasks.id, id)).run()
 }
 
 export async function deleteSubtask(id: string, userId: string) {
+  const subtask = await db.select({
+    id: subtasks.id,
+    taskId: subtasks.taskId,
+  }).from(subtasks)
+    .innerJoin(tasks, eq(subtasks.taskId, tasks.id))
+    .where(and(eq(subtasks.id, id), eq(tasks.userId, userId)))
+    .get()
+  if (!subtask) throw new Error('Subtask not found')
   await db.delete(subtasks).where(eq(subtasks.id, id)).run()
 }

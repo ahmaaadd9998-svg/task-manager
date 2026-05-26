@@ -5,8 +5,8 @@ export default async function ProfilePage() {
   const session = await auth()
 
   return (
-    <div className="space-y-6 max-w-lg">
-      <h1 className="text-2xl font-bold">الملف الشخصي</h1>
+    <div className="space-y-6 w-full max-w-lg mx-auto">
+      <h1 className="text-xl sm:text-2xl font-bold">الملف الشخصي</h1>
       <Card>
         <CardHeader><CardTitle>الحساب</CardTitle></CardHeader>
         <CardContent className="space-y-3">

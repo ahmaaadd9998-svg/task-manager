@@ -1,12 +1,38 @@
 import OpenAI from 'openai'
 import { db } from '@/core/db'
 import { aiLogs } from '@/core/db/schema/ai-logs'
+import { subscriptions } from '@/core/db/schema/subscriptions'
 import { env } from '@/core/config/env'
 import { logger } from '@/core/lib/logger'
+import { and, eq, gte, sql } from 'drizzle-orm'
+
+export class AiQuotaExceededError extends Error {
+  constructor(public used: number, public limit: number) {
+    super('AI quota exceeded for today')
+    this.name = 'AiQuotaExceededError'
+  }
+}
 
 async function getClient() {
   if (!env.OPENAI_API_KEY) return null
   return new OpenAI({ apiKey: env.OPENAI_API_KEY })
+}
+
+async function checkQuota(userId: string) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const result = await db.select({
+    total: sql<number>`COALESCE(SUM(tokens_in + tokens_out), 0)`,
+  }).from(aiLogs).where(
+    and(eq(aiLogs.userId, userId), gte(aiLogs.createdAt, today))
+  ).get()
+
+  const used = result?.total ?? 0
+  const sub = await db.select({ plan: subscriptions.plan }).from(subscriptions).where(eq(subscriptions.userId, userId)).get()
+  const limit = sub?.plan === 'pro' ? env.AI_DAILY_TOKEN_LIMIT_PRO : env.AI_DAILY_TOKEN_LIMIT_FREE
+
+  return { allowed: used < limit, used, limit }
 }
 
 async function logCall(userId: string, feature: string, model: string, tokensIn: number, tokensOut: number, latency: number) {
@@ -25,6 +51,9 @@ async function logCall(userId: string, feature: string, model: string, tokensIn:
 export async function generateTaskSuggestions(userId: string, context: string) {
   const client = await getClient()
   if (!client) return null
+
+  const quota = await checkQuota(userId)
+  if (!quota.allowed) throw new AiQuotaExceededError(quota.used, quota.limit)
 
   const start = Date.now()
   const response = await client.chat.completions.create({
@@ -65,6 +94,9 @@ export async function generateProductivityInsight(userId: string, taskSummary: s
   const client = await getClient()
   if (!client) return null
 
+  const quota = await checkQuota(userId)
+  if (!quota.allowed) throw new AiQuotaExceededError(quota.used, quota.limit)
+
   const start = Date.now()
   const response = await client.chat.completions.create({
     model: 'gpt-4o',
@@ -93,6 +125,9 @@ export async function generateProductivityInsight(userId: string, taskSummary: s
 export async function smartPrioritize(userId: string, tasksJson: string) {
   const client = await getClient()
   if (!client) return null
+
+  const quota = await checkQuota(userId)
+  if (!quota.allowed) throw new AiQuotaExceededError(quota.used, quota.limit)
 
   const start = Date.now()
   const response = await client.chat.completions.create({

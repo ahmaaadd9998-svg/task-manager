@@ -3,7 +3,9 @@
 import { createUser } from './service'
 import { registerSchema } from './validations'
 
-export async function registerAction(_prev: any, formData: FormData) {
+type ActionResult = { error?: string; success?: boolean } | undefined
+
+export async function registerAction(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const name = formData.get('name') as string
   const email = formData.get('email') as string
   const password = formData.get('password') as string
@@ -16,7 +18,8 @@ export async function registerAction(_prev: any, formData: FormData) {
   try {
     await createUser(parsed.data)
     return { success: true }
-  } catch (err: any) {
-    return { error: err.message === 'Email already registered' ? 'البريد الإلكتروني مسجل بالفعل' : 'حدث خطأ أثناء التسجيل' }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : ''
+    return { error: message === 'Email already registered' ? 'البريد الإلكتروني مسجل بالفعل' : 'حدث خطأ أثناء التسجيل' }
   }
 }

@@ -11,7 +11,9 @@ import {
   deleteSubtaskAction
 } from '../actions'
 
-export function TasksList({ initialTasks }: { initialTasks: any[] }) {
+type Task = { id: string; title: string; description?: string | null; status: string; priority: string; subtasks?: { id: string; taskId: string; title: string; isCompleted: boolean }[] }
+
+export function TasksList({ initialTasks }: { initialTasks: Task[] }) {
   const [tasks, setTasks] = useState(initialTasks)
   const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({})
   const [newSubtaskTitles, setNewSubtaskTitles] = useState<Record<string, string>>({})
@@ -65,24 +67,23 @@ export function TasksList({ initialTasks }: { initialTasks: any[] }) {
   return (
     <div className="w-full max-w-7xl mx-auto flex flex-col min-h-[calc(100vh-120px)] gap-6">
       {/* Quick Add Task */}
-      <form action={quickCreateTaskAction} className="flex gap-4 bg-white p-2 rounded-lg border border-gray-200 shadow-sm shrink-0">
+      <form action={quickCreateTaskAction} className="flex flex-col sm:flex-row gap-2 sm:gap-4 bg-white p-2 rounded-lg border border-gray-200 shadow-sm shrink-0">
         <input 
           type="text" 
           name="title" 
           placeholder="ما الذي تريد إنجازه؟" 
-          className="flex-[2] border-0 focus:ring-0 px-4 py-2 text-sm outline-none bg-transparent" 
+          className="w-full sm:flex-[2] border-0 focus:ring-0 px-3 sm:px-4 py-2 text-sm outline-none bg-transparent" 
           required 
         />
-        <div className="w-px bg-gray-200 my-2" />
         <input 
           type="text" 
           name="description" 
           placeholder="التفاصيل (اختياري)" 
-          className="flex-1 border-0 focus:ring-0 px-4 py-2 text-sm outline-none bg-transparent text-gray-500" 
+          className="w-full sm:flex-1 border border-gray-200 sm:border-0 focus:ring-0 px-3 sm:px-4 py-2 text-sm outline-none bg-transparent text-gray-500 rounded sm:rounded-none" 
         />
         <button 
           type="submit" 
-          className="bg-blue-600 text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm"
+          className="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm shrink-0"
         >
           إضافة مهمة
         </button>
@@ -91,11 +92,11 @@ export function TasksList({ initialTasks }: { initialTasks: any[] }) {
       {/* Filter and List Container */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col flex-1">
         {/* Filters Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50/50">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center p-3 sm:p-4 border-b border-gray-100 bg-gray-50/50 overflow-x-auto">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={() => setStatusFilter('all')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+              className={`px-2 sm:px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap ${
                 statusFilter === 'all' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -103,7 +104,7 @@ export function TasksList({ initialTasks }: { initialTasks: any[] }) {
             </button>
             <button
               onClick={() => setStatusFilter('todo')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+              className={`px-2 sm:px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap ${
                 statusFilter === 'todo' ? 'bg-gray-200 text-gray-800' : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -111,7 +112,7 @@ export function TasksList({ initialTasks }: { initialTasks: any[] }) {
             </button>
             <button
               onClick={() => setStatusFilter('in_progress')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+              className={`px-2 sm:px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap ${
                 statusFilter === 'in_progress' ? 'bg-yellow-100 text-yellow-800' : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -119,7 +120,7 @@ export function TasksList({ initialTasks }: { initialTasks: any[] }) {
             </button>
             <button
               onClick={() => setStatusFilter('done')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+              className={`px-2 sm:px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap ${
                 statusFilter === 'done' ? 'bg-green-100 text-green-800' : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -139,22 +140,22 @@ export function TasksList({ initialTasks }: { initialTasks: any[] }) {
             <div className="divide-y divide-gray-100">
               {filteredTasks.map((task) => {
                 const isExpanded = !!expandedTasks[task.id]
-                const completedSubtasks = task.subtasks?.filter((s: any) => s.isCompleted).length || 0
+                const completedSubtasks = task.subtasks?.filter((s) => s.isCompleted).length || 0
                 const totalSubtasks = task.subtasks?.length || 0
 
                 return (
                   <div key={task.id} className="flex flex-col hover:bg-slate-50/50 transition-colors">
                     {/* Task Row */}
-                    <div className="flex items-center justify-between p-4 gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 gap-3 sm:gap-4">
                       {/* Left: Info */}
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                         <button 
                           onClick={() => toggleExpand(task.id)}
-                          className="text-gray-400 hover:text-gray-600 p-1"
+                          className="text-gray-400 hover:text-gray-600 p-1 shrink-0"
                         >
                           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                         </button>
-                        <div className="flex flex-col min-w-0">
+                        <div className="flex flex-col min-w-0 flex-1">
                           <h4 className="text-sm font-semibold text-gray-900 truncate">{task.title}</h4>
                           {task.description && (
                             <p className="text-xs text-gray-500 truncate mt-0.5">{task.description}</p>
@@ -168,12 +169,12 @@ export function TasksList({ initialTasks }: { initialTasks: any[] }) {
                       </div>
 
                       {/* Right: Actions and Status */}
-                      <div className="flex items-center gap-4 shrink-0">
+                      <div className="flex items-center gap-2 sm:gap-4 shrink-0 flex-wrap">
                         {/* Status Select */}
                         <select 
                           value={task.status}
                           onChange={(e) => updateTaskStatusAction(task.id, e.target.value)}
-                          className={`text-xs border rounded-lg py-1.5 px-3 font-semibold cursor-pointer focus:ring-0 ${getStatusColor(task.status)}`}
+                          className={`text-xs border rounded-lg py-1.5 px-2 sm:px-3 font-semibold cursor-pointer focus:ring-0 ${getStatusColor(task.status)}`}
                         >
                           <option value="todo">قيد الانتظار</option>
                           <option value="in_progress">قيد التنفيذ</option>
@@ -186,7 +187,7 @@ export function TasksList({ initialTasks }: { initialTasks: any[] }) {
                             if (!isExpanded) toggleExpand(task.id)
                             toggleAddingSubtask(task.id)
                           }}
-                          className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                          className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors whitespace-nowrap"
                         >
                           {isAddingSubtask[task.id] ? 'إلغاء' : 'إضافة خطوة +'}
                         </button>
@@ -206,11 +207,11 @@ export function TasksList({ initialTasks }: { initialTasks: any[] }) {
 
                     {/* Subtasks Panel (Expanded) */}
                     {isExpanded && (
-                      <div className="bg-slate-50/50 px-12 py-3 border-t border-gray-50 flex flex-col gap-2">
+                      <div className="bg-slate-50/50 px-4 sm:px-12 py-3 border-t border-gray-50 flex flex-col gap-2">
                         {/* List of subtasks */}
                         {task.subtasks && task.subtasks.length > 0 && (
                           <div className="flex flex-col gap-2">
-                            {task.subtasks.map((subtask: any) => (
+                            {task.subtasks.map((subtask) => (
                               <div key={subtask.id} className="flex items-center justify-between group/sub max-w-md">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                   <div 

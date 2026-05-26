@@ -1,8 +1,7 @@
 import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 import { db } from '@/core/db'
-import { users } from '@/core/db/schema/users'
-import { subscriptions } from '@/core/db/schema/subscriptions'
+import { users, subscriptions } from '@/core/db/schema'
 import { logger } from '@/core/lib/logger'
 import type { RegisterInput } from './validations'
 
@@ -15,7 +14,7 @@ export async function createUser(input: RegisterInput) {
   const id = crypto.randomUUID()
   const hashedPassword = await bcrypt.hash(input.password, 12)
 
-  await db.transaction(async (tx: any) => {
+  await db.transaction(async (tx) => {
     await tx.insert(users).values({
       id,
       name: input.name,

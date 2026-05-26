@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, index, primaryKey, unique } from 'drizzle-orm/sqlite-core'
 
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
@@ -24,17 +24,24 @@ export const accounts = sqliteTable('accounts', {
   scope: text('scope'),
   idToken: text('id_token'),
   sessionState: text('session_state'),
-})
+}, (table) => ({
+  accountsProviderUnique: unique().on(table.provider, table.providerAccountId),
+  accountsUserIdIdx: index('accounts_user_id_idx').on(table.userId),
+}))
 
 export const sessions = sqliteTable('sessions', {
   id: text('id').primaryKey(),
   sessionToken: text('session_token').notNull().unique(),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   expires: integer('expires', { mode: 'timestamp' }).notNull(),
-})
+}, (table) => ({
+  sessionsUserIdIdx: index('sessions_user_id_idx').on(table.userId),
+}))
 
 export const verificationTokens = sqliteTable('verification_tokens', {
   identifier: text('identifier').notNull(),
   token: text('token').notNull(),
   expires: integer('expires', { mode: 'timestamp' }).notNull(),
-})
+}, (table) => ({
+  pk: primaryKey({ columns: [table.identifier, table.token] }),
+}))

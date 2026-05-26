@@ -25,7 +25,9 @@ const COLUMNS = [
   { id: 'done', title: 'مكتملة', color: 'bg-green-50', border: 'border-green-200' },
 ]
 
-export function KanbanBoard({ initialTasks }: { initialTasks: any[] }) {
+type Task = { id: string; title: string; description?: string | null; status: string; priority: string; subtasks?: { id: string; taskId: string; title: string; isCompleted: boolean }[] }
+
+export function KanbanBoard({ initialTasks }: { initialTasks: Task[] }) {
   const [tasks, setTasks] = useState(initialTasks)
   const [activeId, setActiveId] = useState<string | null>(null)
 
@@ -79,7 +81,7 @@ export function KanbanBoard({ initialTasks }: { initialTasks: any[] }) {
 
       if (isOverColumn) {
         const activeTask = tasks[activeIndex]
-        const updatedActive = { ...activeTask, status: overId }
+        const updatedActive = { ...activeTask, status: overId as string }
         const newTasks = [...tasks]
         newTasks[activeIndex] = updatedActive
         return arrayMove(newTasks, activeIndex, newTasks.length - 1)
@@ -103,7 +105,7 @@ export function KanbanBoard({ initialTasks }: { initialTasks: any[] }) {
     if (!task) return
 
     const overTask = tasks.find(t => t.id === overId)
-    const newStatus = overTask ? overTask.status : (over.data.current?.type === 'Column' ? overId : task.status)
+    const newStatus = overTask ? overTask.status : (over.data.current?.type === 'Column' ? overId as string : task.status)
     const activeIndex = tasks.findIndex(t => t.id === activeId)
 
     // Call server action to save new position/status
@@ -111,31 +113,30 @@ export function KanbanBoard({ initialTasks }: { initialTasks: any[] }) {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto flex flex-col h-[calc(100vh-120px)]">
-      <form action={quickCreateTaskAction} className="flex gap-4 mb-6 bg-white p-2 rounded-lg border border-gray-200 shadow-sm shrink-0">
+    <div className="w-full max-w-7xl mx-auto flex flex-col h-[calc(100vh-80px)] sm:h-[calc(100vh-120px)]">
+      <form action={quickCreateTaskAction} className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6 bg-white p-2 rounded-lg border border-gray-200 shadow-sm shrink-0">
         <input 
           type="text" 
           name="title" 
           placeholder="ما الذي تريد إنجازه؟" 
-          className="flex-[2] border-0 focus:ring-0 px-4 py-2 text-sm outline-none bg-transparent" 
+          className="flex-[2] border-0 focus:ring-0 px-3 sm:px-4 py-2 text-sm outline-none bg-transparent" 
           required 
         />
-        <div className="w-px bg-gray-200 my-2" />
         <input 
           type="text" 
           name="description" 
           placeholder="التفاصيل (اختياري)" 
-          className="flex-1 border-0 focus:ring-0 px-4 py-2 text-sm outline-none bg-transparent text-gray-500" 
+          className="w-full sm:flex-1 border border-gray-200 sm:border-0 focus:ring-0 px-3 sm:px-4 py-2 text-sm outline-none bg-transparent text-gray-500 rounded sm:rounded-none" 
         />
         <button 
           type="submit" 
-          className="bg-blue-600 text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm"
+          className="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm shrink-0"
         >
           إضافة مهمة
         </button>
       </form>
 
-      <div className="flex gap-6 h-full overflow-hidden">
+      <div className="flex gap-4 sm:gap-6 h-full overflow-x-auto pb-4 snap-x snap-mandatory">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}

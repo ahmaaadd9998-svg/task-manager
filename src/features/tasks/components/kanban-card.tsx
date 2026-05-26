@@ -6,7 +6,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { Check, Plus, Trash2 } from 'lucide-react'
 import { toggleSubtaskAction, deleteSubtaskAction, createSubtaskAction, updateTaskStatusAction, quickDeleteTaskAction } from '../actions'
 
-export function KanbanCard({ task }: { task: any }) {
+export function KanbanCard({ task }: { task: { id: string; title: string; description?: string | null; status: string; priority: string; subtasks?: { id: string; taskId: string; title: string; isCompleted: boolean }[] } }) {
   const [isExpanded, setIsExpanded] = useState(true)
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('')
   const [isAddingSubtask, setIsAddingSubtask] = useState(false)
@@ -41,7 +41,7 @@ export function KanbanCard({ task }: { task: any }) {
     )
   }
 
-  const completedSubtasks = task.subtasks?.filter((s: any) => s.isCompleted).length || 0
+  const completedSubtasks = task.subtasks?.filter((s) => s.isCompleted).length || 0
   const totalSubtasks = task.subtasks?.length || 0
 
   const handleAddSubtask = async (e: React.FormEvent) => {
@@ -72,7 +72,7 @@ export function KanbanCard({ task }: { task: any }) {
 
       {isExpanded && task.subtasks && task.subtasks.length > 0 && (
         <div className="flex flex-col gap-1.5 mt-1">
-          {task.subtasks.map((subtask: any) => (
+          {task.subtasks.map((subtask) => (
             <div key={subtask.id} className="flex items-center justify-between group/sub">
               <label className="flex items-center gap-2 cursor-pointer flex-1">
                 <div 

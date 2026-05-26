@@ -230,24 +230,31 @@ export const logger = pino({
 | Item | Status | Notes |
 |------|--------|-------|
 | Project scaffolding | ✅ DONE | Next.js 16 + TypeScript + Tailwind v4 |
-| DB schema + migrations | ✅ DONE | 6 tables (users, tasks, projects, subscriptions, ai_logs, etc.) pushed to SQLite |
-| Auth.js v4 | ✅ DONE | Credentials + OAuth (GitHub/Google), JWT, proxy.ts for protection |
+| DB schema + migrations | ✅ DONE | 6 tables + indexes + composite PKs |
+| Auth.js v4 | ✅ DONE | Credentials + OAuth (GitHub/Google), JWT, proxy.ts |
 | Project structure | ✅ DONE | features/ (6 domains) + core/ + components/ |
 | Task CRUD | ✅ DONE | Server Actions, RSC pages, status toggle |
 | Project CRUD | ✅ DONE | Server Actions, nested task display |
 | Dashboard page | ✅ DONE | Stats cards, recent tasks |
 | Analytics page | ✅ DONE | Completion rate, overdue, AI insight |
-| AI Service | ✅ DONE | GPT-4o integration (task suggestions, prioritization, insights) |
+| AI Service | ✅ DONE | GPT-4o integration |
 | Stripe billing | ✅ DONE | Checkout, webhook, portal, tier gating |
 | Team service | ✅ DONE | Invite members, remove members |
 | Pino logging | ✅ DONE | Async, JSON, sensitive data redaction |
 | Env validation | ✅ DONE | Zod schema for all env vars |
-| **Build: TypeScript + Production** | ✅ PASS | 14 routes, no errors |
+| **Build: TypeScript + Production** | ✅ PASS | 14 routes, 0 errors |
+| Mobile responsiveness | ✅ DONE | Full Android/iPhone support (RTL) |
+| Security fixes | ✅ DONE | Demo gated, AUTH_SECRET in .env.local, subtask ownership, composit PKs |
+| Indexes + schema | ✅ DONE | FK indexes on all tables, composite PKs on verification_tokens + accounts |
+| Code quality | ✅ DONE | Removed `any` types, dead code, mixed CJS/ESM |
+| Orphaned AI prompts | ✅ REMOVED | Dead code — inline prompts used instead |
+| TanStack Query | ✅ REMOVED | Unused dependency |
+| Error pages | ✅ DONE | 404 + error boundary pages |
 | Drag-and-drop reorder | ⏳ PENDING | Client-side enhancement |
-| UploadThing integration | ⏳ PENDING | Task file attachments |
-| Resend emails | ⏳ PENDING | Welcome, assignment notifications |
+| UploadThing integration | ❌ SKIPPED | Dependency removed — dead code |
+| Resend emails | ❌ SKIPPED | Dependency removed — dead code |
 | Test suite | ⏳ PENDING | Playwright or Cypress |
-| Rate limiting (AI costs) | ⏳ PENDING | Token budget per user/tier |
+| Rate limiting (AI costs) | ✅ DONE | Token budget per user/tier — free: 10K/day, pro: 100K/day |
 | Production deploy | ⏳ PENDING | Vercel or Docker |
 
 ---
@@ -298,5 +305,23 @@ export const logger = pino({
 - **Verify**: Full flow compiles and builds ✅
 
 ---
+
+### Sprint 2 — Code Quality & Mobile ✅
+- [x] Composite PK on `verification_tokens` (identifier + token)
+- [x] Composite UNIQUE on `accounts` (provider + providerAccountId)
+- [x] FK indexes on all joined columns (user_id, project_id, task_id, etc.)
+- [x] Demo login gated behind `NODE_ENV !== 'production'`
+- [x] `AUTH_SECRET` moved to `.env.local`, out of git
+- [x] `subtasks` export from barrel index
+- [x] ESM-only imports (removed `require()`)
+- [x] Quick-create task uses Zod validation
+- [x] Subtask ownership verified via inner join on user_id
+- [x] Task delete uses `useTransition` instead of `confirm()`
+- [x] Analytics SVG donut extracted to `task-stats-donut.tsx`
+- [x] Dead code removed (`prompts.ts`, TanStack Query)
+- [x] All `any` types replaced with proper TypeScript types
+- [x] Full mobile responsiveness (dashboard, kanban, auth, projects, settings)
+- [x] 404 + error pages
+- [x] Build: 14 routes, 0 type errors, 0 warnings
 
 > **Rule enforced**: No feature creep — any addition beyond this scope requires explicit approval.

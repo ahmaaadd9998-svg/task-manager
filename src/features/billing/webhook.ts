@@ -10,7 +10,7 @@ export async function processStripeWebhook(body: string, signature: string) {
   const event = stripe.webhooks.constructEvent(body, signature, env.STRIPE_WEBHOOK_SECRET)
 
   try {
-    await handleWebhookEvent(event)
+    await handleWebhookEvent(event as unknown as Record<string, unknown>)
     logger.info({ type: event.type }, 'Webhook processed')
   } catch (err) {
     logger.error({ err, type: event.type }, 'Webhook handler failed')

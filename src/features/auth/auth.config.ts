@@ -6,8 +6,7 @@ import Google from 'next-auth/providers/google'
 import bcrypt from 'bcryptjs'
 import { eq } from 'drizzle-orm'
 import { db } from '@/core/db'
-import { users } from '@/core/db/schema/users'
-import { subscriptions } from '@/core/db/schema/subscriptions'
+import { users, subscriptions } from '@/core/db/schema'
 import { env } from '@/core/config/env'
 import { logger } from '@/core/lib/logger'
 
@@ -24,11 +23,12 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
         
-        // Demo User Bypass
-        if (credentials.email === 'demo@taskai.local' && credentials.password === 'demo12345') {
-          const user = await db.select().from(users).where(eq(users.email, 'demo@taskai.local')).get()
-          if (user) {
-            return { id: user.id, email: user.email, name: user.name, image: user.image }
+        if (process.env.NODE_ENV !== 'production') {
+          if (credentials.email === 'demo@taskai.local' && credentials.password === 'demo12345') {
+            const user = await db.select().from(users).where(eq(users.email, 'demo@taskai.local')).get()
+            if (user) {
+              return { id: user.id, email: user.email, name: user.name, image: user.image }
+            }
           }
         }
 
@@ -52,7 +52,7 @@ export const authOptions: NextAuthOptions = {
         const existing = await db.select().from(users).where(eq(users.email, user.email!)).get()
         if (!existing) {
           const id = crypto.randomUUID()
-          await db.transaction(async (tx: any) => {
+          await db.transaction(async (tx) => {
             await tx.insert(users).values({ id, name: user.name!, email: user.email!, image: user.image }).run()
             await tx.insert(subscriptions).values({ id: crypto.randomUUID(), userId: id, plan: 'free', status: 'active' }).run()
           })

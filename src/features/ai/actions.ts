@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { auth } from '@/features/auth/auth.config'
 import * as aiService from './service'
+import { AiQuotaExceededError } from './service'
 import { logger } from '@/core/lib/logger'
 
 export async function getAiTaskSuggestions(projectContext: string) {
@@ -13,6 +14,10 @@ export async function getAiTaskSuggestions(projectContext: string) {
     const suggestions = await aiService.generateTaskSuggestions(session.user.id, projectContext)
     return suggestions
   } catch (err) {
+    if (err instanceof AiQuotaExceededError) {
+      logger.warn({ used: err.used, limit: err.limit }, 'AI quota exceeded for suggestions')
+      return null
+    }
     logger.error({ err }, 'AI suggestion failed')
     return null
   }
@@ -38,6 +43,10 @@ export async function getProductivityInsight() {
   try {
     return await aiService.generateProductivityInsight(session.user.id, summary)
   } catch (err) {
+    if (err instanceof AiQuotaExceededError) {
+      logger.warn({ used: err.used, limit: err.limit }, 'AI quota exceeded for insight')
+      return null
+    }
     logger.error({ err }, 'AI insight failed')
     return null
   }
@@ -58,7 +67,16 @@ export async function prioritizeTasks() {
 
   if (userTasks.length === 0) return null
 
-  const result = await aiService.smartPrioritize(session.user.id, JSON.stringify({ tasks: userTasks }))
+  let result: Awaited<ReturnType<typeof aiService.smartPrioritize>>
+  try {
+    result = await aiService.smartPrioritize(session.user.id, JSON.stringify({ tasks: userTasks }))
+  } catch (err) {
+    if (err instanceof AiQuotaExceededError) {
+      logger.warn({ used: err.used, limit: err.limit }, 'AI quota exceeded for prioritization')
+      return null
+    }
+    throw err
+  }
   if (!result) return null
 
   for (const item of result) {

@@ -3,7 +3,10 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDroppable } from '@dnd-kit/core'
 import { KanbanCard } from './kanban-card'
 
-export function KanbanColumn({ column, tasks }: { column: any; tasks: any[] }) {
+type Column = { id: string; title: string; color: string; border: string }
+type Task = { id: string; title: string; description?: string | null; status: string; priority: string; subtasks?: { id: string; taskId: string; title: string; isCompleted: boolean }[] }
+
+export function KanbanColumn({ column, tasks }: { column: Column; tasks: Task[] }) {
   const taskIds = useMemo(() => tasks.map((t) => t.id), [tasks])
 
   const { setNodeRef } = useDroppable({
@@ -17,7 +20,7 @@ export function KanbanColumn({ column, tasks }: { column: any; tasks: any[] }) {
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col w-full min-w-[300px] max-w-[400px] rounded-lg border ${column.border} ${column.color} shrink-0 h-full overflow-hidden`}
+      className={`flex flex-col w-[85vw] sm:w-full min-w-[280px] sm:min-w-[300px] max-w-[400px] rounded-lg border ${column.border} ${column.color} shrink-0 h-full overflow-hidden snap-center`}
     >
       <div className="flex items-center justify-between p-4 border-b border-black/5 bg-black/5">
         <h3 className="font-semibold text-gray-800">{column.title}</h3>

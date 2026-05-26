@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core'
 import { users } from './users'
 
 export const aiLogs = sqliteTable('ai_logs', {
@@ -11,4 +11,7 @@ export const aiLogs = sqliteTable('ai_logs', {
   tokensOut: integer('tokens_out').notNull().default(0),
   latency: integer('latency'),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-})
+}, (table) => ({
+  aiLogsUserIdIdx: index('ai_logs_user_id_idx').on(table.userId),
+  aiLogsUserDateIdx: index('ai_logs_user_date_idx').on(table.userId, table.createdAt),
+}))

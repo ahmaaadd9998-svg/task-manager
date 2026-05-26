@@ -1,6 +1,6 @@
 import { eq, and } from 'drizzle-orm'
 import { db } from '@/core/db'
-import { projects } from '@/core/db/schema/projects'
+import { projects } from '@/core/db/schema'
 import type { CreateProjectInput, UpdateProjectInput } from './validations'
 import { logger } from '@/core/lib/logger'
 

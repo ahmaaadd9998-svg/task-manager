@@ -15,6 +15,8 @@ const envSchema = z.object({
   NEXT_PUBLIC_STRIPE_PRO_PRICE_ID: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug']).default('info'),
+  AI_DAILY_TOKEN_LIMIT_FREE: z.coerce.number().default(10000),
+  AI_DAILY_TOKEN_LIMIT_PRO: z.coerce.number().default(100000),
 })
 
 export type Env = z.infer<typeof envSchema>

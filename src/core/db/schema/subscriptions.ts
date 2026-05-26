@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core'
 import { users } from './users'
 
 export const subscriptions = sqliteTable('subscriptions', {
@@ -12,4 +12,6 @@ export const subscriptions = sqliteTable('subscriptions', {
   currentPeriodEnd: integer('current_period_end', { mode: 'timestamp' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-})
+}, (table) => ({
+  subscriptionUserIdIdx: index('subscriptions_user_id_idx').on(table.userId),
+}))

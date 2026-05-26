@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { db } from '@/core/db'
-import { subscriptions } from '@/core/db/schema/subscriptions'
+import { subscriptions } from '@/core/db/schema'
 import { env } from '@/core/config/env'
 import { logger } from '@/core/lib/logger'
 
@@ -60,31 +60,37 @@ export async function createPortalSession(userId: string) {
   return session.url
 }
 
-export async function handleWebhookEvent(event: any) {
-  switch (event.type) {
+export async function handleWebhookEvent(event: Record<string, unknown>) {
+  const type = event.type as string
+  const data = event.data as Record<string, unknown> | undefined
+  const obj = data?.object as Record<string, unknown> | undefined
+  const created = event.created as number
+  switch (type) {
     case 'checkout.session.completed': {
-      const session = event.data.object
-      const userId = session.metadata?.userId
-      if (userId && session.subscription) {
+      const metadata = (obj?.metadata as Record<string, string> | undefined)
+      const userId = metadata?.userId
+      const subscription = obj?.subscription as string | undefined
+      if (userId && subscription && obj) {
         await db.update(subscriptions).set({
-          stripeSubscriptionId: session.subscription,
+          stripeSubscriptionId: subscription,
           plan: 'pro',
           status: 'active',
-          currentPeriodStart: new Date(session.created * 1000),
-          currentPeriodEnd: new Date(session.expires_at * 1000),
+          currentPeriodStart: new Date(created * 1000),
+          currentPeriodEnd: new Date((obj.expires_at as number) * 1000),
         }).where(eq(subscriptions.userId, userId)).run()
         logger.info({ userId }, 'Subscription upgraded to Pro')
       }
       break
     }
     case 'customer.subscription.deleted': {
-      const sub = event.data.object
-      const customerId = sub.customer
-      await db.update(subscriptions).set({
-        plan: 'free',
-        status: 'canceled',
-        stripeSubscriptionId: null,
-      }).where(eq(subscriptions.stripeCustomerId, customerId)).run()
+      const customerId = obj?.customer as string | undefined
+      if (customerId) {
+        await db.update(subscriptions).set({
+          plan: 'free',
+          status: 'canceled',
+          stripeSubscriptionId: null,
+        }).where(eq(subscriptions.stripeCustomerId, customerId)).run()
+      }
       break
     }
   }
