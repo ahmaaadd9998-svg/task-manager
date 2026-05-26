@@ -12,10 +12,11 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const session = await auth()
   if (!session?.user?.id) return null
 
-  const project = getProject(id, session.user.id)
+  const project = await getProject(id, session.user.id)
   if (!project) notFound()
 
-  const taskList = getTasks(session.user.id, id)
+  const taskList = await getTasks(session.user.id, id)
+
 
   return (
     <div className="space-y-6">

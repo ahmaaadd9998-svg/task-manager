@@ -9,7 +9,7 @@ export default async function TasksPage() {
     redirect('/login')
   }
 
-  const tasks = getTasks(session.user.id)
+  const tasks = await getTasks(session.user.id)
 
   return <KanbanBoard initialTasks={tasks} />
 }

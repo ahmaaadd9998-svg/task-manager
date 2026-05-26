@@ -8,8 +8,9 @@ export default async function BillingPage() {
   const session = await auth()
   if (!session?.user?.id) return null
 
-  const subscription = getUserSubscription(session.user.id)
+  const subscription = await getUserSubscription(session.user.id)
   const isPro = subscription?.plan === 'pro'
+
 
   return (
     <div className="space-y-6 max-w-lg">

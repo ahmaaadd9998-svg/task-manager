@@ -11,16 +11,17 @@ export default async function AnalyticsPage() {
   const now = new Date()
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
 
-  const total = db.select({ value: count() }).from(tasks).where(eq(tasks.userId, session.user.id)).get()?.value ?? 0
-  const done = db.select({ value: count() }).from(tasks).where(and(eq(tasks.userId, session.user.id), eq(tasks.status, 'done'))).get()?.value ?? 0
-  const inProgress = db.select({ value: count() }).from(tasks).where(and(eq(tasks.userId, session.user.id), eq(tasks.status, 'in_progress'))).get()?.value ?? 0
-  const todo = db.select({ value: count() }).from(tasks).where(and(eq(tasks.userId, session.user.id), eq(tasks.status, 'todo'))).get()?.value ?? 0
-  const overdue = db.select({ value: count() }).from(tasks).where(
+  const total = (await db.select({ value: count() }).from(tasks).where(eq(tasks.userId, session.user.id)).get())?.value ?? 0
+  const done = (await db.select({ value: count() }).from(tasks).where(and(eq(tasks.userId, session.user.id), eq(tasks.status, 'done'))).get())?.value ?? 0
+  const inProgress = (await db.select({ value: count() }).from(tasks).where(and(eq(tasks.userId, session.user.id), eq(tasks.status, 'in_progress'))).get())?.value ?? 0
+  const todo = (await db.select({ value: count() }).from(tasks).where(and(eq(tasks.userId, session.user.id), eq(tasks.status, 'todo'))).get())?.value ?? 0
+  const overdue = (await db.select({ value: count() }).from(tasks).where(
     and(eq(tasks.userId, session.user.id), eq(tasks.status, 'todo'), lt(tasks.dueDate, now))
-  ).get()?.value ?? 0
-  const weekDone = db.select({ value: count() }).from(tasks).where(
+  ).get())?.value ?? 0
+  const weekDone = (await db.select({ value: count() }).from(tasks).where(
     and(eq(tasks.userId, session.user.id), eq(tasks.status, 'done'), gte(tasks.updatedAt, weekAgo))
-  ).get()?.value ?? 0
+  ).get())?.value ?? 0
+
 
   const completionRate = total > 0 ? Math.round((done / total) * 100) : 0
   const inProgressRate = total > 0 ? Math.round((inProgress / total) * 100) : 0

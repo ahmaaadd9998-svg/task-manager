@@ -10,7 +10,7 @@ async function getClient() {
 }
 
 async function logCall(userId: string, feature: string, model: string, tokensIn: number, tokensOut: number, latency: number) {
-  db.insert(aiLogs).values({
+  await db.insert(aiLogs).values({
     id: crypto.randomUUID(),
     userId,
     feature,
@@ -20,6 +20,7 @@ async function logCall(userId: string, feature: string, model: string, tokensIn:
     latency,
   }).run()
 }
+
 
 export async function generateTaskSuggestions(userId: string, context: string) {
   const client = await getClient()

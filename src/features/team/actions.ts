@@ -13,7 +13,7 @@ export async function addMemberAction(formData: FormData) {
   if (!projectId || !email) return { error: 'Missing fields' }
 
   try {
-    teamService.addMember(projectId, email)
+    await teamService.addMember(projectId, email)
     revalidatePath(`/projects/${projectId}`)
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Failed to add member' }

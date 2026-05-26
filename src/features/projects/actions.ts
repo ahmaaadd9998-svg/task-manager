@@ -20,7 +20,7 @@ export async function createProjectAction(formData: FormData) {
   })
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
-  projectService.createProject(userId, parsed.data)
+  await projectService.createProject(userId, parsed.data)
   revalidatePath('/projects')
 }
 
@@ -29,7 +29,7 @@ export async function deleteProjectAction(formData: FormData) {
   const id = formData.get('id') as string
   if (!id) return { error: 'Project ID required' }
 
-  projectService.deleteProject(id, userId)
+  await projectService.deleteProject(id, userId)
   revalidatePath('/projects')
   revalidatePath('/tasks')
 }

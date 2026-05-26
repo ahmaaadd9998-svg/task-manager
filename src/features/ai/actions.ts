@@ -26,12 +26,12 @@ export async function getProductivityInsight() {
   const { tasks } = await import('@/core/db/schema/tasks')
   const { eq, and, count, lt } = await import('drizzle-orm')
 
-  const total = db.select({ value: count() }).from(tasks).where(eq(tasks.userId, session.user.id)).get()?.value ?? 0
-  const done = db.select({ value: count() }).from(tasks).where(and(eq(tasks.userId, session.user.id), eq(tasks.status, 'done'))).get()?.value ?? 0
+  const total = (await db.select({ value: count() }).from(tasks).where(eq(tasks.userId, session.user.id)).get())?.value ?? 0
+  const done = (await db.select({ value: count() }).from(tasks).where(and(eq(tasks.userId, session.user.id), eq(tasks.status, 'done'))).get())?.value ?? 0
   const now = new Date()
-  const overdue = db.select({ value: count() }).from(tasks).where(
+  const overdue = (await db.select({ value: count() }).from(tasks).where(
     and(eq(tasks.userId, session.user.id), lt(tasks.dueDate, now), eq(tasks.status, 'todo'))
-  ).get()?.value ?? 0
+  ).get())?.value ?? 0
 
   const summary = `Tasks: ${total} total, ${done} done, ${overdue} overdue`
 
@@ -51,7 +51,7 @@ export async function prioritizeTasks() {
   const { tasks } = await import('@/core/db/schema/tasks')
   const { eq, and } = await import('drizzle-orm')
 
-  const userTasks = db.select({ id: tasks.id, title: tasks.title, priority: tasks.priority, dueDate: tasks.dueDate })
+  const userTasks = await db.select({ id: tasks.id, title: tasks.title, priority: tasks.priority, dueDate: tasks.dueDate })
     .from(tasks)
     .where(and(eq(tasks.userId, session.user.id), eq(tasks.status, 'todo')))
     .all()
@@ -62,7 +62,7 @@ export async function prioritizeTasks() {
   if (!result) return null
 
   for (const item of result) {
-    db.update(tasks).set({ position: item.position }).where(eq(tasks.id, item.id)).run()
+    await db.update(tasks).set({ position: item.position }).where(eq(tasks.id, item.id)).run()
   }
 
   revalidatePath('/')

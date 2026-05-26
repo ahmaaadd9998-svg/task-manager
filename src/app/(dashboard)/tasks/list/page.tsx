@@ -9,7 +9,7 @@ export default async function TasksListPage() {
     redirect('/login')
   }
 
-  const tasks = getTasks(session.user.id)
+  const tasks = await getTasks(session.user.id)
 
   return <TasksList initialTasks={tasks} />
 }

@@ -4,8 +4,8 @@ import { users } from '@/core/db/schema/users'
 import { projectMembers } from '@/core/db/schema/projects'
 import { logger } from '@/core/lib/logger'
 
-export function getProjectMembers(projectId: string) {
-  return db.select({
+export async function getProjectMembers(projectId: string) {
+  return await db.select({
     id: users.id,
     name: users.name,
     email: users.email,
@@ -18,17 +18,17 @@ export function getProjectMembers(projectId: string) {
     .all()
 }
 
-export function addMember(projectId: string, email: string) {
-  const user = db.select().from(users).where(eq(users.email, email)).get()
+export async function addMember(projectId: string, email: string) {
+  const user = await db.select().from(users).where(eq(users.email, email)).get()
   if (!user) throw new Error('User not found')
 
-  const existing = db.select().from(projectMembers)
+  const existing = await db.select().from(projectMembers)
     .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, user.id)))
     .get()
 
   if (existing) throw new Error('User is already a member')
 
-  db.insert(projectMembers).values({
+  await db.insert(projectMembers).values({
     id: crypto.randomUUID(),
     projectId,
     userId: user.id,
@@ -39,8 +39,8 @@ export function addMember(projectId: string, email: string) {
   return user
 }
 
-export function removeMember(projectId: string, userId: string) {
-  db.delete(projectMembers)
+export async function removeMember(projectId: string, userId: string) {
+  await db.delete(projectMembers)
     .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, userId)))
     .run()
   logger.info({ projectId, userId }, 'Member removed from project')

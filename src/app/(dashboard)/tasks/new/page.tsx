@@ -8,7 +8,7 @@ export default async function NewTaskPage() {
   const session = await auth()
   if (!session?.user?.id) return null
 
-  const projectList = getProjects(session.user.id)
+  const projectList = await getProjects(session.user.id)
 
   return (
     <div className="space-y-6 max-w-lg">

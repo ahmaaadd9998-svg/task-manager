@@ -4,12 +4,12 @@ import { subscriptions } from '@/core/db/schema/subscriptions'
 import { env } from '@/core/config/env'
 import { logger } from '@/core/lib/logger'
 
-export function getUserSubscription(userId: string) {
-  return db.select().from(subscriptions).where(eq(subscriptions.userId, userId)).get()
+export async function getUserSubscription(userId: string) {
+  return await db.select().from(subscriptions).where(eq(subscriptions.userId, userId)).get()
 }
 
-export function isPro(userId: string) {
-  const sub = getUserSubscription(userId)
+export async function isPro(userId: string) {
+  const sub = await getUserSubscription(userId)
   return sub?.plan === 'pro' && sub?.status === 'active'
 }
 
@@ -18,18 +18,18 @@ export async function createStripeCheckout(userId: string) {
   if (!env.STRIPE_SECRET_KEY) throw new Error('Stripe not configured')
 
   const stripe = new Stripe(env.STRIPE_SECRET_KEY)
-  const sub = getUserSubscription(userId)
+  const sub = await getUserSubscription(userId)
 
   if (!sub?.stripeCustomerId) {
     const { users } = await import('@/core/db/schema/users')
-    const user = db.select().from(users).where(eq(users.id, userId)).get()
+    const user = await db.select().from(users).where(eq(users.id, userId)).get()
     if (!user) throw new Error('User not found')
 
     const customer = await stripe.customers.create({ email: user.email, name: user.name, metadata: { userId } })
-    db.update(subscriptions).set({ stripeCustomerId: customer.id }).where(eq(subscriptions.userId, userId)).run()
+    await db.update(subscriptions).set({ stripeCustomerId: customer.id }).where(eq(subscriptions.userId, userId)).run()
   }
 
-  const updated = getUserSubscription(userId)
+  const updated = await getUserSubscription(userId)
   if (!updated?.stripeCustomerId) throw new Error('Failed to create customer')
 
   const session = await stripe.checkout.sessions.create({
@@ -49,7 +49,7 @@ export async function createPortalSession(userId: string) {
   if (!env.STRIPE_SECRET_KEY) throw new Error('Stripe not configured')
 
   const stripe = new Stripe(env.STRIPE_SECRET_KEY)
-  const sub = getUserSubscription(userId)
+  const sub = await getUserSubscription(userId)
   if (!sub?.stripeCustomerId) throw new Error('No customer found')
 
   const session = await stripe.billingPortal.sessions.create({
@@ -66,7 +66,7 @@ export async function handleWebhookEvent(event: any) {
       const session = event.data.object
       const userId = session.metadata?.userId
       if (userId && session.subscription) {
-        db.update(subscriptions).set({
+        await db.update(subscriptions).set({
           stripeSubscriptionId: session.subscription,
           plan: 'pro',
           status: 'active',
@@ -80,7 +80,7 @@ export async function handleWebhookEvent(event: any) {
     case 'customer.subscription.deleted': {
       const sub = event.data.object
       const customerId = sub.customer
-      db.update(subscriptions).set({
+      await db.update(subscriptions).set({
         plan: 'free',
         status: 'canceled',
         stripeSubscriptionId: null,

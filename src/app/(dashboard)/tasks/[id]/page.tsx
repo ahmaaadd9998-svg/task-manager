@@ -15,11 +15,12 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
   const session = await auth()
   if (!session?.user?.id) return null
 
-  const task = getTask(id, session.user.id)
+  const task = await getTask(id, session.user.id)
   if (!task) notFound()
 
-  const projectList = getProjects(session.user.id)
+  const projectList = await getProjects(session.user.id)
   const project = projectList.find((p: any) => p.id === task.projectId)
+
 
   return (
     <div className="space-y-6 max-w-2xl">

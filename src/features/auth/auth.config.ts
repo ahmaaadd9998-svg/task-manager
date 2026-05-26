@@ -26,13 +26,13 @@ export const authOptions: NextAuthOptions = {
         
         // Demo User Bypass
         if (credentials.email === 'demo@taskai.local' && credentials.password === 'demo12345') {
-          const user = db.select().from(users).where(eq(users.email, 'demo@taskai.local')).get()
+          const user = await db.select().from(users).where(eq(users.email, 'demo@taskai.local')).get()
           if (user) {
             return { id: user.id, email: user.email, name: user.name, image: user.image }
           }
         }
 
-        const user = db.select().from(users).where(eq(users.email, credentials.email)).get()
+        const user = await db.select().from(users).where(eq(users.email, credentials.email)).get()
         if (!user || !user.password) return null
         const valid = await bcrypt.compare(credentials.password, user.password)
         if (!valid) return null
@@ -49,12 +49,12 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider !== 'credentials') {
-        const existing = db.select().from(users).where(eq(users.email, user.email!)).get()
+        const existing = await db.select().from(users).where(eq(users.email, user.email!)).get()
         if (!existing) {
           const id = crypto.randomUUID()
-          db.transaction((tx: any) => {
-            tx.insert(users).values({ id, name: user.name!, email: user.email!, image: user.image }).run()
-            tx.insert(subscriptions).values({ id: crypto.randomUUID(), userId: id, plan: 'free', status: 'active' }).run()
+          await db.transaction(async (tx: any) => {
+            await tx.insert(users).values({ id, name: user.name!, email: user.email!, image: user.image }).run()
+            await tx.insert(subscriptions).values({ id: crypto.randomUUID(), userId: id, plan: 'free', status: 'active' }).run()
           })
           user.id = id
         } else {

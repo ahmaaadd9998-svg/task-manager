@@ -24,7 +24,7 @@ export async function createTaskAction(_prev: ActionResult, formData: FormData):
   })
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
-  taskService.createTask(userId, parsed.data)
+  await taskService.createTask(userId, parsed.data)
   revalidatePath('/tasks')
   revalidatePath('/')
 }
@@ -33,7 +33,7 @@ export async function quickCreateTaskAction(formData: FormData) {
   const userId = await getUserId()
   const title = formData.get('title') as string
   const description = formData.get('description') as string
-  taskService.createTask(userId, { title, description, priority: 'medium', projectId: undefined })
+  await taskService.createTask(userId, { title, description, priority: 'medium', projectId: undefined })
   revalidatePath('/tasks')
   revalidatePath('/')
 }
@@ -51,7 +51,7 @@ export async function updateTaskAction(formData: FormData) {
   })
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
-  taskService.updateTask(userId, parsed.data)
+  await taskService.updateTask(userId, parsed.data)
   revalidatePath('/tasks')
   revalidatePath('/')
 }
@@ -61,7 +61,7 @@ export async function deleteTaskAction(formData: FormData) {
   const id = formData.get('id') as string
   if (!id) return { error: 'Task ID required' }
 
-  taskService.deleteTask(id, userId)
+  await taskService.deleteTask(id, userId)
   revalidatePath('/tasks')
   revalidatePath('/')
 }
@@ -70,7 +70,7 @@ export async function quickDeleteTaskAction(formData: FormData) {
   const userId = await getUserId()
   const id = formData.get('id') as string
   if (id) {
-    taskService.deleteTask(id, userId)
+    await taskService.deleteTask(id, userId)
     revalidatePath('/tasks')
     revalidatePath('/')
   }
@@ -78,35 +78,35 @@ export async function quickDeleteTaskAction(formData: FormData) {
 
 export async function updateTaskStatusAction(taskId: string, status: string) {
   const userId = await getUserId()
-  taskService.updateTask(userId, { id: taskId, status: status as 'todo' | 'in_progress' | 'done' })
+  await taskService.updateTask(userId, { id: taskId, status: status as 'todo' | 'in_progress' | 'done' })
   revalidatePath('/tasks')
   revalidatePath('/')
 }
 
 export async function updateTaskPositionAction(taskId: string, status: string, position: number) {
   const userId = await getUserId()
-  taskService.updateTask(userId, { id: taskId, status: status as 'todo' | 'in_progress' | 'done', position })
+  await taskService.updateTask(userId, { id: taskId, status: status as 'todo' | 'in_progress' | 'done', position })
   revalidatePath('/tasks')
   revalidatePath('/')
 }
 
 export async function createSubtaskAction(taskId: string, title: string) {
   const userId = await getUserId()
-  taskService.createSubtask(taskId, title, userId)
+  await taskService.createSubtask(taskId, title, userId)
   revalidatePath('/tasks')
   revalidatePath('/')
 }
 
 export async function toggleSubtaskAction(id: string, isCompleted: boolean) {
   const userId = await getUserId()
-  taskService.toggleSubtask(id, isCompleted, userId)
+  await taskService.toggleSubtask(id, isCompleted, userId)
   revalidatePath('/tasks')
   revalidatePath('/')
 }
 
 export async function deleteSubtaskAction(id: string) {
   const userId = await getUserId()
-  taskService.deleteSubtask(id, userId)
+  await taskService.deleteSubtask(id, userId)
   revalidatePath('/tasks')
   revalidatePath('/')
 }
