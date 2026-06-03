@@ -67,23 +67,23 @@ export function TasksList({ initialTasks }: { initialTasks: Task[] }) {
   return (
     <div className="w-full max-w-7xl mx-auto flex flex-col min-h-[calc(100vh-120px)] gap-6">
       {/* Quick Add Task */}
-      <form action={quickCreateTaskAction} className="flex flex-col sm:flex-row gap-2 sm:gap-4 bg-white p-2 rounded-lg border border-gray-200 shadow-sm shrink-0">
+      <form action={quickCreateTaskAction} className="flex flex-col sm:flex-row gap-2 sm:gap-4 bg-white p-3 sm:p-2 rounded-xl border border-gray-200 shadow-sm shrink-0">
         <input 
           type="text" 
           name="title" 
           placeholder="ما الذي تريد إنجازه؟" 
-          className="w-full sm:flex-[2] border-0 focus:ring-0 px-3 sm:px-4 py-2 text-sm outline-none bg-transparent" 
+          className="w-full sm:flex-[2] border border-gray-100 sm:border-0 focus:ring-2 focus:ring-blue-500/25 focus:border-blue-500 sm:focus:ring-0 sm:focus:border-transparent px-3 sm:px-4 py-2 text-sm outline-none bg-transparent rounded-lg sm:rounded-none text-right font-medium" 
           required 
         />
         <input 
           type="text" 
           name="description" 
           placeholder="التفاصيل (اختياري)" 
-          className="w-full sm:flex-1 border border-gray-200 sm:border-0 focus:ring-0 px-3 sm:px-4 py-2 text-sm outline-none bg-transparent text-gray-500 rounded sm:rounded-none" 
+          className="w-full sm:flex-1 border border-gray-100 sm:border-0 focus:ring-2 focus:ring-blue-500/25 focus:border-blue-500 sm:focus:ring-0 sm:focus:border-transparent px-3 sm:px-4 py-2 text-sm outline-none bg-transparent text-gray-500 rounded-lg sm:rounded-none text-right" 
         />
         <button 
           type="submit" 
-          className="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm shrink-0"
+          className="bg-blue-600 text-white px-4 py-2.5 sm:py-2 rounded-lg sm:rounded-md text-sm font-semibold hover:bg-blue-700 transition-all shadow-md shadow-blue-500/10 hover:shadow-lg shrink-0 cursor-pointer active:scale-95"
         >
           إضافة مهمة
         </button>

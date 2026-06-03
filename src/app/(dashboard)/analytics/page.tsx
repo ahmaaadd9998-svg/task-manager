@@ -31,37 +31,37 @@ export default async function AnalyticsPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">إحصائيات المهام</h1>
       
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <Card className="border-gray-200/80 shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-semibold text-gray-500">نسبة الإنجاز</CardTitle>
+          <CardHeader className="pb-1 p-3 sm:p-6">
+            <CardTitle className="text-[10px] sm:text-xs font-semibold text-gray-500 truncate">نسبة الإنجاز</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-extrabold text-blue-600">{completionRate}%</p>
+          <CardContent className="p-3 sm:p-6 pt-0">
+            <p className="text-2xl sm:text-3xl font-extrabold text-blue-600">{completionRate}%</p>
           </CardContent>
         </Card>
         <Card className="border-gray-200/80 shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-semibold text-gray-500">قيد التنفيذ</CardTitle>
+          <CardHeader className="pb-1 p-3 sm:p-6">
+            <CardTitle className="text-[10px] sm:text-xs font-semibold text-gray-500 truncate">قيد التنفيذ</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-extrabold text-yellow-600">{inProgress}</p>
+          <CardContent className="p-3 sm:p-6 pt-0">
+            <p className="text-2xl sm:text-3xl font-extrabold text-yellow-600">{inProgress}</p>
           </CardContent>
         </Card>
         <Card className="border-gray-200/80 shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-semibold text-gray-500">مهام متأخرة</CardTitle>
+          <CardHeader className="pb-1 p-3 sm:p-6">
+            <CardTitle className="text-[10px] sm:text-xs font-semibold text-gray-500 truncate">مهام متأخرة</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-extrabold text-red-600">{overdue}</p>
+          <CardContent className="p-3 sm:p-6 pt-0">
+            <p className="text-2xl sm:text-3xl font-extrabold text-red-600">{overdue}</p>
           </CardContent>
         </Card>
         <Card className="border-gray-200/80 shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-semibold text-gray-500">أنجزت هذا الأسبوع</CardTitle>
+          <CardHeader className="pb-1 p-3 sm:p-6">
+            <CardTitle className="text-[10px] sm:text-xs font-semibold text-gray-500 truncate">أنجزت هذا الأسبوع</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-extrabold text-green-600">{weekDone}</p>
+          <CardContent className="p-3 sm:p-6 pt-0">
+            <p className="text-2xl sm:text-3xl font-extrabold text-green-600">{weekDone}</p>
           </CardContent>
         </Card>
       </div>

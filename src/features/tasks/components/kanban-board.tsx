@@ -30,6 +30,7 @@ type Task = { id: string; title: string; description?: string | null; status: st
 export function KanbanBoard({ initialTasks }: { initialTasks: Task[] }) {
   const [tasks, setTasks] = useState(initialTasks)
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState('todo')
 
   // Update tasks when initialTasks change from server (e.g. after a mutation)
   useEffect(() => {
@@ -113,30 +114,62 @@ export function KanbanBoard({ initialTasks }: { initialTasks: Task[] }) {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto flex flex-col h-[calc(100vh-80px)] sm:h-[calc(100vh-120px)]">
-      <form action={quickCreateTaskAction} className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6 bg-white p-2 rounded-lg border border-gray-200 shadow-sm shrink-0">
+    <div className="w-full max-w-7xl mx-auto flex flex-col h-[calc(100vh-140px)] sm:h-[calc(100vh-160px)]">
+      {/* Quick Add Form */}
+      <form action={quickCreateTaskAction} className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6 bg-white p-3 sm:p-2 rounded-xl border border-gray-200 shadow-sm shrink-0">
         <input 
           type="text" 
           name="title" 
           placeholder="ما الذي تريد إنجازه؟" 
-          className="flex-[2] border-0 focus:ring-0 px-3 sm:px-4 py-2 text-sm outline-none bg-transparent" 
+          className="w-full sm:flex-[2] border border-gray-100 sm:border-0 focus:ring-2 focus:ring-blue-500/25 focus:border-blue-500 sm:focus:ring-0 sm:focus:border-transparent px-3 sm:px-4 py-2 text-sm outline-none bg-transparent rounded-lg sm:rounded-none text-right font-medium" 
           required 
         />
         <input 
           type="text" 
           name="description" 
           placeholder="التفاصيل (اختياري)" 
-          className="w-full sm:flex-1 border border-gray-200 sm:border-0 focus:ring-0 px-3 sm:px-4 py-2 text-sm outline-none bg-transparent text-gray-500 rounded sm:rounded-none" 
+          className="w-full sm:flex-1 border border-gray-100 sm:border-0 focus:ring-2 focus:ring-blue-500/25 focus:border-blue-500 sm:focus:ring-0 sm:focus:border-transparent px-3 sm:px-4 py-2 text-sm outline-none bg-transparent text-gray-500 rounded-lg sm:rounded-none text-right" 
         />
         <button 
           type="submit" 
-          className="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm shrink-0"
+          className="bg-blue-600 text-white px-4 py-2.5 sm:py-2 rounded-lg sm:rounded-md text-sm font-semibold hover:bg-blue-700 transition-all shadow-md shadow-blue-500/10 hover:shadow-lg shrink-0 cursor-pointer active:scale-95"
         >
           إضافة مهمة
         </button>
       </form>
 
-      <div className="flex gap-4 sm:gap-6 h-full overflow-x-auto pb-4 snap-x snap-mandatory">
+      {/* Mobile Column Switcher Tabs */}
+      <div className="flex sm:hidden border border-gray-150 mb-4 bg-gray-100/50 rounded-xl p-1 shadow-inner gap-1 shrink-0">
+        {COLUMNS.map((col) => {
+          const count = tasks.filter((t) => t.status === col.id).length
+          const isActive = activeTab === col.id
+          
+          let activeTabStyle = 'bg-blue-600 text-white shadow-sm'
+          if (col.id === 'in_progress') activeTabStyle = 'bg-yellow-600 text-white shadow-sm'
+          if (col.id === 'done') activeTabStyle = 'bg-green-600 text-white shadow-sm'
+          
+          return (
+            <button
+              key={col.id}
+              type="button"
+              onClick={() => setActiveTab(col.id)}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer select-none ${
+                isActive
+                  ? activeTabStyle
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
+              }`}
+            >
+              <span>{col.title}</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20' : 'bg-gray-250 text-gray-600'}`}>
+                {count}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Kanban Columns List */}
+      <div className="flex gap-4 sm:gap-6 h-full sm:overflow-x-auto pb-4 min-h-0">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}
@@ -146,12 +179,17 @@ export function KanbanBoard({ initialTasks }: { initialTasks: Task[] }) {
         >
           {COLUMNS.map((col) => {
             const columnTasks = tasks.filter((t) => t.status === col.id)
+            const isActive = col.id === activeTab
             return (
-              <KanbanColumn 
+              <div 
                 key={col.id} 
-                column={col} 
-                tasks={columnTasks} 
-              />
+                className={`w-full sm:w-auto ${isActive ? 'flex' : 'hidden sm:flex'} flex-col h-full shrink-0`}
+              >
+                <KanbanColumn 
+                  column={col} 
+                  tasks={columnTasks} 
+                />
+              </div>
             )
           })}
           

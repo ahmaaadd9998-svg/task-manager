@@ -20,7 +20,7 @@ export function KanbanColumn({ column, tasks }: { column: Column; tasks: Task[] 
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col w-[85vw] sm:w-full min-w-[280px] sm:min-w-[300px] max-w-[400px] rounded-lg border ${column.border} ${column.color} shrink-0 h-full overflow-hidden snap-center`}
+      className={`flex flex-col w-full sm:w-[320px] md:w-[350px] min-w-[280px] rounded-lg border ${column.border} ${column.color} shrink-0 h-full overflow-hidden`}
     >
       <div className="flex items-center justify-between p-4 border-b border-black/5 bg-black/5">
         <h3 className="font-semibold text-gray-800">{column.title}</h3>
