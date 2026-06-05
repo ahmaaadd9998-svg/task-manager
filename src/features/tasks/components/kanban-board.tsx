@@ -113,10 +113,37 @@ export function KanbanBoard({ initialTasks }: { initialTasks: Task[] }) {
     await updateTaskPositionAction(activeId, newStatus, activeIndex)
   }
 
+  const handleQuickCreateTask = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const title = formData.get('title') as string
+    const description = formData.get('description') as string
+    if (!title) return
+
+    const tempId = crypto.randomUUID()
+    const tempTask = {
+      id: tempId,
+      title,
+      description: description || null,
+      status: 'todo',
+      priority: 'medium',
+      subtasks: []
+    }
+
+    setTasks(prev => [tempTask, ...prev])
+    e.currentTarget.reset()
+
+    try {
+      await quickCreateTaskAction(formData)
+    } catch (error) {
+      setTasks(prev => prev.filter(t => t.id !== tempId))
+    }
+  }
+
   return (
     <div className="w-full max-w-7xl mx-auto flex flex-col h-[calc(100vh-140px)] sm:h-[calc(100vh-160px)]">
       {/* Quick Add Form */}
-      <form action={quickCreateTaskAction} className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6 bg-white p-3 sm:p-2 rounded-xl border border-gray-200 shadow-sm shrink-0">
+      <form onSubmit={handleQuickCreateTask} className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6 bg-white p-3 sm:p-2 rounded-xl border border-gray-200 shadow-sm shrink-0">
         <input 
           type="text" 
           name="title" 

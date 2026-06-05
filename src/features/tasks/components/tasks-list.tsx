@@ -32,13 +32,177 @@ export function TasksList({ initialTasks }: { initialTasks: Task[] }) {
     setIsAddingSubtask(prev => ({ ...prev, [taskId]: !prev[taskId] }))
   }
 
+  const handleQuickCreateTask = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const title = formData.get('title') as string
+    const description = formData.get('description') as string
+    if (!title) return
+
+    const tempId = crypto.randomUUID()
+    const tempTask = {
+      id: tempId,
+      title,
+      description: description || null,
+      status: 'todo',
+      priority: 'medium',
+      subtasks: []
+    }
+
+    setTasks(prev => [tempTask, ...prev])
+    e.currentTarget.reset()
+
+    try {
+      await quickCreateTaskAction(formData)
+    } catch (error) {
+      setTasks(prev => prev.filter(t => t.id !== tempId))
+    }
+  }
+
   const handleAddSubtask = async (e: React.FormEvent, taskId: string) => {
     e.preventDefault()
     const title = newSubtaskTitles[taskId]?.trim()
     if (!title) return
-    
-    await createSubtaskAction(taskId, title)
+
+    const tempSubtaskId = crypto.randomUUID()
+    const tempSubtask = {
+      id: tempSubtaskId,
+      taskId,
+      title,
+      isCompleted: false
+    }
+
+    setTasks(prev => prev.map(t => {
+      if (t.id === taskId) {
+        return {
+          ...t,
+          subtasks: [...(t.subtasks || []), tempSubtask]
+        }
+      }
+      return t
+    }))
+
     setNewSubtaskTitles(prev => ({ ...prev, [taskId]: '' }))
+
+    try {
+      await createSubtaskAction(taskId, title)
+    } catch (error) {
+      setTasks(prev => prev.map(t => {
+        if (t.id === taskId) {
+          return {
+            ...t,
+            subtasks: (t.subtasks || []).filter(st => st.id !== tempSubtaskId)
+          }
+        }
+        return t
+      }))
+    }
+  }
+
+  const handleToggleSubtask = async (subtaskId: string, currentCompleted: boolean) => {
+    setTasks(prev => prev.map(t => {
+      return {
+        ...t,
+        subtasks: (t.subtasks || []).map(st => {
+          if (st.id === subtaskId) {
+            return { ...st, isCompleted: !currentCompleted }
+          }
+          return st
+        })
+      }
+    }))
+
+    try {
+      await toggleSubtaskAction(subtaskId, !currentCompleted)
+    } catch (error) {
+      setTasks(prev => prev.map(t => {
+        return {
+          ...t,
+          subtasks: (t.subtasks || []).map(st => {
+            if (st.id === subtaskId) {
+              return { ...st, isCompleted: currentCompleted }
+            }
+            return st
+          })
+        }
+      }))
+    }
+  }
+
+  const handleDeleteSubtask = async (subtaskId: string) => {
+    let oldSubtasks: any[] = []
+    setTasks(prev => prev.map(t => {
+      const target = (t.subtasks || []).find(st => st.id === subtaskId)
+      if (target) {
+        oldSubtasks = t.subtasks || []
+        return {
+          ...t,
+          subtasks: (t.subtasks || []).filter(st => st.id !== subtaskId)
+        }
+      }
+      return t
+    }))
+
+    try {
+      await deleteSubtaskAction(subtaskId)
+    } catch (error) {
+      setTasks(prev => prev.map(t => {
+        if (oldSubtasks.some(st => st.id === subtaskId)) {
+          return {
+            ...t,
+            subtasks: oldSubtasks
+          }
+        }
+        return t
+      }))
+    }
+  }
+
+  const handleUpdateStatus = async (taskId: string, newStatus: string) => {
+    const oldStatus = tasks.find(t => t.id === taskId)?.status
+    if (!oldStatus) return
+
+    setTasks(prev => prev.map(t => {
+      if (t.id === taskId) {
+        return { ...t, status: newStatus }
+      }
+      return t
+    }))
+
+    try {
+      await updateTaskStatusAction(taskId, newStatus)
+    } catch (error) {
+      setTasks(prev => prev.map(t => {
+        if (t.id === taskId) {
+          return { ...t, status: oldStatus }
+        }
+        return t
+      }))
+    }
+  }
+
+  const handleDeleteTask = async (taskId: string) => {
+    const deletedTask = tasks.find(t => t.id === taskId)
+    if (!deletedTask) return
+
+    setTasks(prev => prev.filter(t => t.id !== taskId))
+
+    try {
+      const formData = new FormData()
+      formData.append('id', taskId)
+      await quickDeleteTaskAction(formData)
+    } catch (error) {
+      setTasks(prev => {
+        const index = initialTasks.findIndex(t => t.id === taskId)
+        const newTasks = [...prev]
+        if (index !== -1) {
+          newTasks.splice(index, 0, deletedTask)
+        } else {
+          newTasks.push(deletedTask)
+        }
+        return newTasks
+      })
+    }
   }
 
   const filteredTasks = tasks.filter(task => {
@@ -67,7 +231,7 @@ export function TasksList({ initialTasks }: { initialTasks: Task[] }) {
   return (
     <div className="w-full max-w-7xl mx-auto flex flex-col min-h-[calc(100vh-120px)] gap-6">
       {/* Quick Add Task */}
-      <form action={quickCreateTaskAction} className="flex flex-col sm:flex-row gap-2 sm:gap-4 bg-white p-3 sm:p-2 rounded-xl border border-gray-200 shadow-sm shrink-0">
+      <form onSubmit={handleQuickCreateTask} className="flex flex-col sm:flex-row gap-2 sm:gap-4 bg-white p-3 sm:p-2 rounded-xl border border-gray-200 shadow-sm shrink-0">
         <input 
           type="text" 
           name="title" 
@@ -173,7 +337,7 @@ export function TasksList({ initialTasks }: { initialTasks: Task[] }) {
                         {/* Status Select */}
                         <select 
                           value={task.status}
-                          onChange={(e) => updateTaskStatusAction(task.id, e.target.value)}
+                          onChange={(e) => handleUpdateStatus(task.id, e.target.value)}
                           className={`text-xs border rounded-lg py-1.5 px-2 sm:px-3 font-semibold cursor-pointer focus:ring-0 ${getStatusColor(task.status)}`}
                         >
                           <option value="todo">قيد الانتظار</option>
@@ -192,16 +356,14 @@ export function TasksList({ initialTasks }: { initialTasks: Task[] }) {
                           {isAddingSubtask[task.id] ? 'إلغاء' : 'إضافة خطوة +'}
                         </button>
 
-                        {/* Delete Form */}
-                        <form action={quickDeleteTaskAction} className="flex items-center">
-                          <input type="hidden" name="id" value={task.id} />
-                          <button 
-                            type="submit" 
-                            className="text-gray-400 hover:text-red-600 p-1 transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </form>
+                        {/* Optimistic Delete Button */}
+                        <button 
+                          type="button" 
+                          onClick={() => handleDeleteTask(task.id)}
+                          className="text-gray-400 hover:text-red-600 p-1 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
 
@@ -218,7 +380,7 @@ export function TasksList({ initialTasks }: { initialTasks: Task[] }) {
                                     className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
                                       subtask.isCompleted ? 'bg-blue-600 border-blue-600 text-white' : 'border-gray-300 bg-white'
                                     }`}
-                                    onClick={() => toggleSubtaskAction(subtask.id, !subtask.isCompleted)}
+                                    onClick={() => handleToggleSubtask(subtask.id, subtask.isCompleted)}
                                   >
                                     {subtask.isCompleted && <Check className="w-3 h-3" />}
                                   </div>
@@ -227,8 +389,9 @@ export function TasksList({ initialTasks }: { initialTasks: Task[] }) {
                                   </span>
                                 </label>
                                 <button 
-                                  onClick={() => deleteSubtaskAction(subtask.id)}
-                                  className="opacity-0 group-hover/sub:opacity-100 text-gray-400 hover:text-red-500 p-1 transition-opacity"
+                                  type="button"
+                                  onClick={() => handleDeleteSubtask(subtask.id)}
+                                  className="opacity-0 group-hover/sub:opacity-100 text-gray-400 hover:text-red-500 p-1 transition-opacity cursor-pointer"
                                 >
                                   <Trash2 className="w-3 h-3" />
                                 </button>

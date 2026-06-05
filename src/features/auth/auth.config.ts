@@ -23,12 +23,10 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
         
-        if (process.env.NODE_ENV !== 'production') {
-          if (credentials.email === 'demo@taskai.local' && credentials.password === 'demo12345') {
-            const user = await db.select().from(users).where(eq(users.email, 'demo@taskai.local')).get()
-            if (user) {
-              return { id: user.id, email: user.email, name: user.name, image: user.image }
-            }
+        if (credentials.email === 'demo@taskai.local' && credentials.password === 'demo12345') {
+          const user = await db.select().from(users).where(eq(users.email, 'demo@taskai.local')).get()
+          if (user) {
+            return { id: user.id, email: user.email, name: user.name, image: user.image }
           }
         }
 
