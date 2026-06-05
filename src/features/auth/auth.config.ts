@@ -1,4 +1,5 @@
 import NextAuth, { type NextAuthOptions } from 'next-auth'
+import crypto from 'crypto'
 import { getServerSession } from 'next-auth/next'
 import Credentials from 'next-auth/providers/credentials'
 import GitHub from 'next-auth/providers/github'

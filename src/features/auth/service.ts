@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm'
+import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import { db } from '@/core/db'
 import { users, subscriptions } from '@/core/db/schema'

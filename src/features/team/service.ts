@@ -1,4 +1,5 @@
 import { eq, and } from 'drizzle-orm'
+import crypto from 'crypto'
 import { db } from '@/core/db'
 import { users } from '@/core/db/schema/users'
 import { projectMembers } from '@/core/db/schema/projects'

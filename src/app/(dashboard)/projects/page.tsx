@@ -30,7 +30,7 @@ export default async function ProjectsPage() {
         </CardContent></Card>
       ) : (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {projectList.map((project) => (
+          {projectList.map((project: any) => (
             <Link key={project.id} href={`/projects/${project.id}`}>
               <Card className="hover:bg-accent/50 transition-colors h-full">
                 <CardContent className="pt-6">

@@ -1,4 +1,5 @@
 import { eq, and } from 'drizzle-orm'
+import crypto from 'crypto'
 import { db } from '@/core/db'
 import { projects } from '@/core/db/schema'
 import type { CreateProjectInput, UpdateProjectInput } from './validations'

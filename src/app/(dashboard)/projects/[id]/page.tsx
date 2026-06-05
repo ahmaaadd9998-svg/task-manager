@@ -36,7 +36,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           <Card><CardContent className="py-8 text-center text-muted-foreground">
             <p>لا توجد مهام في هذا المشروع.</p>
           </CardContent></Card>
-        ) : taskList.map((task) => (
+        ) : taskList.map((task: any) => (
           <Link key={task.id} href={`/tasks/${task.id}`}>
             <Card className="hover:bg-accent/50 transition-colors">
               <CardContent className="flex items-center justify-between py-3 gap-2">

@@ -1,4 +1,5 @@
 import OpenAI from 'openai'
+import crypto from 'crypto'
 import { db } from '@/core/db'
 import { aiLogs } from '@/core/db/schema/ai-logs'
 import { subscriptions } from '@/core/db/schema/subscriptions'

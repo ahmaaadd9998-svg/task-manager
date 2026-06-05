@@ -1,4 +1,5 @@
 import { eq, and, inArray } from 'drizzle-orm'
+import crypto from 'crypto'
 import { db } from '@/core/db'
 import { tasks, subtasks } from '@/core/db/schema'
 import type { CreateTaskInput, UpdateTaskInput } from './validations'
@@ -14,15 +15,15 @@ export async function getTasks(userId: string, projectId?: string) {
     .orderBy(tasks.position)
     .all()
 
-  const taskIds = userTasks.map((t) => t.id)
+  const taskIds = userTasks.map((t: any) => t.id)
   let allSubtasks: (typeof subtasks.$inferSelect)[] = []
   if (taskIds.length > 0) {
     allSubtasks = await db.select().from(subtasks).where(inArray(subtasks.taskId, taskIds)).all()
   }
 
-  return userTasks.map((t) => ({
+  return userTasks.map((t: any) => ({
     ...t,
-    subtasks: allSubtasks.filter((st) => st.taskId === t.id)
+    subtasks: allSubtasks.filter((st: any) => st.taskId === t.id)
   }))
 }
 

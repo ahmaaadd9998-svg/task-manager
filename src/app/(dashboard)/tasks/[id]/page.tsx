@@ -19,7 +19,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
   if (!task) notFound()
 
   const projectList = await getProjects(session.user.id)
-  const project = projectList.find((p) => p.id === task.projectId)
+  const project = projectList.find((p: any) => p.id === task.projectId)
 
 
   return (
