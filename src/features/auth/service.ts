@@ -14,21 +14,19 @@ export async function createUser(input: RegisterInput) {
   const id = crypto.randomUUID()
   const hashedPassword = await bcrypt.hash(input.password, 12)
 
-  await db.transaction(async (tx) => {
-    await tx.insert(users).values({
-      id,
-      name: input.name,
-      email: input.email,
-      password: hashedPassword,
-    }).run()
+  await db.insert(users).values({
+    id,
+    name: input.name,
+    email: input.email,
+    password: hashedPassword,
+  }).run()
 
-    await tx.insert(subscriptions).values({
-      id: crypto.randomUUID(),
-      userId: id,
-      plan: 'free',
-      status: 'active',
-    }).run()
-  })
+  await db.insert(subscriptions).values({
+    id: crypto.randomUUID(),
+    userId: id,
+    plan: 'free',
+    status: 'active',
+  }).run()
 
   logger.info({ userId: id }, 'User created with free subscription')
   return { id, name: input.name, email: input.email }

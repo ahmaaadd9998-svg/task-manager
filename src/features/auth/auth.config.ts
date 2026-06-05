@@ -28,19 +28,17 @@ export const authOptions: NextAuthOptions = {
           let user = await db.select().from(users).where(eq(users.email, credentials.email)).get()
           if (!user) {
             const id = crypto.randomUUID()
-            await db.transaction(async (tx: any) => {
-              await tx.insert(users).values({
-                id,
-                name: 'زائر',
-                email: credentials.email,
-              }).run()
-              await tx.insert(subscriptions).values({
-                id: crypto.randomUUID(),
-                userId: id,
-                plan: 'free',
-                status: 'active',
-              }).run()
-            })
+            await db.insert(users).values({
+              id,
+              name: 'زائر',
+              email: credentials.email,
+            }).run()
+            await db.insert(subscriptions).values({
+              id: crypto.randomUUID(),
+              userId: id,
+              plan: 'free',
+              status: 'active',
+            }).run()
             user = await db.select().from(users).where(eq(users.email, credentials.email)).get()
           }
           if (user) {
@@ -75,10 +73,8 @@ export const authOptions: NextAuthOptions = {
         const existing = await db.select().from(users).where(eq(users.email, user.email!)).get()
         if (!existing) {
           const id = crypto.randomUUID()
-          await db.transaction(async (tx) => {
-            await tx.insert(users).values({ id, name: user.name!, email: user.email!, image: user.image }).run()
-            await tx.insert(subscriptions).values({ id: crypto.randomUUID(), userId: id, plan: 'free', status: 'active' }).run()
-          })
+          await db.insert(users).values({ id, name: user.name!, email: user.email!, image: user.image }).run()
+          await db.insert(subscriptions).values({ id: crypto.randomUUID(), userId: id, plan: 'free', status: 'active' }).run()
           user.id = id
         } else {
           user.id = existing.id
