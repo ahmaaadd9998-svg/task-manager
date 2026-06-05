@@ -41,18 +41,24 @@ export default function LoginPage() {
     }
   }
 
-  const handleDemoLogin = async () => {
+  const handleGuestLogin = async () => {
     setError(null)
     setLoading(true)
     try {
+      let guestEmail = localStorage.getItem('guest_email')
+      if (!guestEmail) {
+        guestEmail = `guest_${window.crypto.randomUUID()}@guest.taskai.local`
+        localStorage.setItem('guest_email', guestEmail)
+      }
+
       const res = await signIn('credentials', {
-        email: 'demo@taskai.local',
-        password: 'demo12345',
+        email: guestEmail,
+        password: 'guest12345',
         redirect: false,
       })
 
       if (res?.error) {
-        setError('فشل الدخول كـ Demo User. يرجى إنشاء حساب جديد.')
+        setError('فشل الدخول كزائر. يرجى المحاولة لاحقاً.')
       } else {
         router.push('/tasks')
         router.refresh()
@@ -109,11 +115,11 @@ export default function LoginPage() {
         <Button 
           type="button" 
           variant="outline" 
-          onClick={handleDemoLogin} 
+          onClick={handleGuestLogin} 
           className="w-full border-purple-200 hover:bg-purple-50/50 hover:text-purple-700 text-purple-600"
           disabled={loading}
         >
-          الدخول كـ Demo User
+          الدخول كـ زائر (بدون حساب)
         </Button>
 
         <p className="text-xs text-center text-gray-500 mt-6">
